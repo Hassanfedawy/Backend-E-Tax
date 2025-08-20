@@ -19,6 +19,16 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->boolean('is_admin')->default(false); 
+            $table->boolean('is_approved')->default(false); 
+            $table->string('national_id')->nullable();      
+            $table->boolean('is_verified')->default(false);
+            $table->unsignedBigInteger('subscription_id')->nullable();
+
+            $table->foreign('subscription_id')
+                  ->references('id')->on('subscriptions')
+                  ->cascadeOnDelete(); 
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
