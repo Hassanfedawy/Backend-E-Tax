@@ -32,8 +32,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-    public $timestamps = false;
-    protected $guarded = [];
+   
     public function posts(){ return $this->hasMany(Post::class); }
     public function attachments(){ return $this->morphMany(Attachment::class, 'attachable'); }
     public function subscription() {

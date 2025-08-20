@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
 {
-    public $timestamps = false;
-    protected $guarded = [];
-
+    
     public function users() {
         return $this->hasMany(User::class);
     }
