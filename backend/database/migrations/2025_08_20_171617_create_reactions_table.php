@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reactions', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            
             $table->unsignedBigInteger('user_id');          
             $table->string('reactionable_type');            
             $table->unsignedBigInteger('reactionable_id');  
@@ -23,6 +23,7 @@ return new class extends Migration
 
     
             $table->unique(['user_id','reactionable_type','reactionable_id']);
+            $table->timestamps();
 
         });
     }

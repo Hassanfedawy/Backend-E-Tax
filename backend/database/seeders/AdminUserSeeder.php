@@ -12,18 +12,16 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::firstOrCreate(
-      ['email' => 'admin@example.com'],
-      [
-        'name' => 'Admin',
-        'password' => bcrypt('Admin@12345'),
-        'is_admin' => true,
-        'is_approved' => true, // clubhouse-style gate
-        'is_verified' => true, // email verified
-        'national_id' => null,
-      ]
-    );
-  
-
+        \App\Models\User::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL')],
+            [
+                'name'        => env('ADMIN_NAME'),
+                'password'    => bcrypt(env('ADMIN_PASSWORD')),
+                'is_admin'    => true,
+                'is_approved' => true,
+                
+            ]
+        );
     }
+
 }
