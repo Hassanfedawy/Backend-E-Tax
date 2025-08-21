@@ -22,7 +22,7 @@ class SubscriptionController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'price'    => 'required|numeric|min:0',
-            'features' => 'nullable|string',
+            'no_of_posts' => 'nullable|string',
             'is_active'=> 'boolean'
         ]);
 
@@ -45,7 +45,7 @@ class SubscriptionController extends Controller
         $request->validate([
             'name'     => 'sometimes|required|string|max:255',
             'cost'    => 'sometimes|required|numeric|min:0',
-            'features' => 'nullable|string',
+            'no_of_posts' => 'nullable|string',
             'is_active'=> 'boolean'
         ]);
 

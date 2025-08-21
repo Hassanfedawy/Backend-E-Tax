@@ -14,7 +14,7 @@ class Subscription extends Model
 
     protected $fillable = [
         'name',
-        'price',
-        'features',
+        'cost',
+        'no_of_posts',
     ];
 }
