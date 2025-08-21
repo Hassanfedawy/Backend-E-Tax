@@ -33,29 +33,39 @@ class SubscriptionController extends Controller
 
     public function show(int $id)
     {
-     $subscription = Subscription::findOrFail($id);
-    //  where('id', $id)
-    //  where('name', $name)
-
+     $subscription = Subscription::find($id); //  NULL if not found
+     if( $subscription === null ){
+         return response()->json(['message' => 'Subscription not found'], 404);
+     }
         return response()->json($subscription);
     }
 
-    public function update(Request $request, Subscription $subscription)
+    public function update(Request $request, string $id)
     {
-        $request->validate([
+        $subscription = Subscription::find($id);
+        if( $subscription === null ){
+            return response()->json(['message' => 'Subscription not found'], 404);
+        }
+
+        $validatedData =  $request->validate([
             'name'     => 'sometimes|required|string|max:255',
             'cost'    => 'sometimes|required|numeric|min:0',
             'no_of_posts' => 'nullable|string',
             'is_active'=> 'boolean'
         ]);
 
-        $subscription->update($request->all());
+        $subscription->update($validatedData);
 
         return response()->json(['message' => 'Subscription updated', 'data' => $subscription]);
     }
 
-    public function destroy(Subscription $subscription)
+    public function destroy(string $id)
     {
+        $subscription = Subscription::find($id);
+        if( $subscription === null ){
+            return response()->json(['message' => 'Subscription not found'], 404);
+        }
+
         $subscription->delete();
         return response()->json(['message' => 'Subscription deleted']);
     }
