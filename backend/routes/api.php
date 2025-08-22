@@ -18,3 +18,6 @@ Route::post('/posts',      [PostController::class, 'store']);
 Route::get('/posts/mine',  [PostController::class, 'myPosts']);
 Route::get('/posts',       [PostController::class, 'index']);
 Route::get('/posts/{id}',  [PostController::class, 'show']);
+
+
+// APIs are tested by Abdalrahman and Done
