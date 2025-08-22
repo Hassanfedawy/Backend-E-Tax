@@ -21,7 +21,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'subscription_id',
+        'is_admin',
+        'is_approved',
+        'national_id',  
+
     ];
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -38,6 +48,18 @@ class User extends Authenticatable
     public function subscription() {
         return $this->belongsTo(Subscription::class);
     }
+    // Helper to get profile image
+public function profileImage()
+{
+    return $this->attachments()->where('category', 'profile_image');
+}
+
+// Helper to get national ID attachment
+public function nationalId()
+{
+    return $this->attachments()->where('category', 'national_id');
+}
+
 
     /**
      * Get the attributes that should be cast.

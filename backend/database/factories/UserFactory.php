@@ -29,6 +29,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // add your migration fields
+            'is_admin' => 0,
+            'is_approved' => 0,
+            'national_id' => fake()->optional()->numerify('########'),
+            'subscription_id' => rand(1, 3), // random subscription
         ];
     }
 
