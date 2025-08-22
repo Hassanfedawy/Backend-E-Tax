@@ -13,7 +13,6 @@ return new class extends Migration
     {   
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            
             $table->string('attachable_type');           
             $table->unsignedBigInteger('attachable_id'); 
             $table->enum('category', ['profile_image','national_id','post']); 
