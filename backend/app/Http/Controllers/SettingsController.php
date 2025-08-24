@@ -55,28 +55,62 @@ class SettingsController extends Controller
         ]);
     }
     
-    /**
-     * Get revenue per subscription plan.
-     */
-    public function getRevenueBySubscription()
-    {
-        // Fetch all subscriptions with user count
-        $subscriptions = Subscription::withCount('users')->get();
+    
+public function getRevenueBySubscription()
+{
+    // Fetch all subscriptions with user count
+    $subscriptions = \App\Models\Subscription::withCount('users')->get();
 
-        // Calculate revenue for each plan
-        $revenues = $subscriptions->map(function ($subscription) {
-            return [
-                'plan'     => $subscription->name,
-                'users'    => $subscription->users_count,
-                'cost'     => $subscription->cost,
-                'revenue'  => $subscription->users_count * $subscription->cost,
-            ];
-        });
+    // Calculate revenue for each plan
+    $revenues = $subscriptions->map(function ($subscription) {
+        return [
+            'id'       => $subscription->id,  
+            'plan'     => $subscription->name,
+            'users'    => $subscription->users_count,
+            'cost'     => $subscription->cost,
+            'revenue'  => $subscription->users_count * $subscription->cost,
+        ];
+    });
+
+    return response()->json([
+        'message' => 'Revenue calculated successfully',
+        'data'    => $revenues
+    ]);
+} 
+
+    public function index()
+    {
+        $settings = Setting::all();
 
         return response()->json([
-            'message' => 'Revenue calculated successfully',
-            'data'    => $revenues
-        ]);
+            'status' => true,
+            'data'   => $settings
+        ], 200);
     }
+
+    /**
+     * Delete a setting by id
+     */
+    public function destroy($id)
+    {
+        $setting = Setting::find($id);
+
+        if (!$setting) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Setting not found'
+            ], 404);
+        }
+
+        $setting->delete();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Setting deleted successfully'
+        ], 200);
+    }
+
+
+
 
 }

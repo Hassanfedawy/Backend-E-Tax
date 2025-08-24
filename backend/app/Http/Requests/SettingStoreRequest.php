@@ -22,9 +22,9 @@ class SettingStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'key'   => 'required|string|unique:settings,key',
+            'key'   => 'required|string|unique:settings,key|max:255',
             'value' => 'required|string',
-            'label' => 'required|string',
+            'label' => 'required|string|max:1000',
         ];
     }
 }

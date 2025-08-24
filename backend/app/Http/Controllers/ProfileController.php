@@ -11,18 +11,38 @@ class ProfileController extends Controller
     /**
      * Get user profile with posts + attachments.
      */
-    public function show($id)
-    {
-        $user = User::with(['attachments', 'posts.attachments'])->findOrFail($id);
+   public function show($id)
+{
+    $user = User::with(['attachments', 'posts.attachments'])->findOrFail($id);
 
-        return response()->json([
-            'status' => true,
-            'data'   => $user
-        ]);
-    }
+    // Map posts to include a link
+    $posts = $user->posts->map(function ($post) {
+        return [
+            'id'          => $post->id,
+            'title'       => $post->title,
+            'description' => $post->description,
+            'link'        => url("/posts/{$post->id}"), 
+            'attachments' => $post->attachments,        
+            'created_at'  => $post->created_at,
+            'updated_at'  => $post->updated_at,
+        ];
+    });
+
+    return response()->json([
+        'status' => true,
+        'data'   => [
+            'id'          => $user->id,
+            'name'        => $user->name,
+            'email'       => $user->email,
+            'attachments' => $user->attachments,
+            'posts'       => $posts, // posts now contain links
+        ],
+    ]);
+}
+
 
     public function update(Request $request, $id)
-    {
+    { dd($request->all());
     $user = User::findOrFail($id);
 
     $request->validate([
@@ -39,6 +59,7 @@ class ProfileController extends Controller
         $user->email = $request->email;
     }
     $user->save();
+    dd($request);
 
     // Handle profile image upload
     if ($request->hasFile('profile_image')) {
@@ -68,6 +89,33 @@ class ProfileController extends Controller
 
     return response()->json($updatedUser);
 }
+public function changePassword(Request $request)
+    {
+        // ✅ Validate request
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed', 
+        ]);
+
+        $user = User::find($request->user_id);
+
+        // ✅ Check current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password does not match'
+            ], 400);
+        }
+
+        // ✅ Update password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password updated successfully'
+        ]);
+    }
+
     
 
 }
