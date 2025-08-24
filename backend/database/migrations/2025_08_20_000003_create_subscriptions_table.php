@@ -12,11 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->id();
-           
+           $table->id();
             $table->string('name');   
             $table->integer('no_of_posts'); 
-           
             $table->float('cost');
             $table->timestamps();
         });

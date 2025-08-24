@@ -5,6 +5,14 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\Api\SubscriptionController as AdminSubscriptionController;
+
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ReactionController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\Api\ApprovalController;
+use App\Http\Controllers\Api\UserController;
 
 // Public routes (no authentication needed)
 Route::post('/register', [AuthController::class, 'register']);  // an identifier when a post requests happens go to the register method in authcontroller to implement it
@@ -48,3 +56,41 @@ Route::middleware('auth:api')->group(function () {          //will check for a v
     })->middleware('throttle:6,1')->name('verification.send');
 
 });
+
+
+
+Route::apiResource('subscriptions', AdminSubscriptionController::class);
+
+// Get all subscription plans
+Route::get('/subscriptions', [SubscriptionController::class, 'active']);
+
+// Initialize Paymob payment for a subscription
+Route::post('/subscriptions/pay', [PaymentController::class, 'checkout']);
+
+// Optional: Webhook / Callback from Paymob
+Route::post('/payment/callback', [PaymentController::class, 'paymentCallback']);
+
+Route::prefix('posts')->group(function () {
+    // Get all comments for a post
+    Route::get('{postId}/comments', [CommentController::class, 'index']); 
+
+    // Actions on comments under a post
+    Route::prefix('{postId}/comments')->group(function () {
+        Route::post('/', [CommentController::class, 'store']); // ✅ POST for new comment
+        Route::get('{id}', [CommentController::class, 'show']);
+        Route::put('{id}', [CommentController::class, 'update']);
+        Route::delete('{id}', [CommentController::class, 'destroy']);
+    });
+});
+
+Route::post('/reaction', [ReactionController::class, 'react']);
+Route::delete('/reaction', [ReactionController::class, 'remove']);
+Route::get('/reaction', [ReactionController::class, 'getReactions']);
+    
+
+Route::post('/users/{id}/approve', [ApprovalController::class, 'approve']);
+Route::post('/users/{id}/reject', [ApprovalController::class, 'reject']);
+
+Route::apiResource('users', UserController::class);
+Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
+Route::post('users/{user}/remove-role', [UserController::class, 'removeRole']);
