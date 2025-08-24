@@ -9,7 +9,9 @@ class ApprovalController extends Controller
 {
     public function approve($id)
     {
+
         $user = User::find($id);
+        $setting=Setting::first();
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
@@ -22,6 +24,7 @@ class ApprovalController extends Controller
         }
 
         $user->is_approved = true;
+        $user->available_posts=setting->available_posts;
         $user->save();
 
         return response()->json([
