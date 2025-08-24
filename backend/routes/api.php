@@ -7,6 +7,8 @@ use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Api\ApprovalController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\UserController;
+
 
 Route::apiResource('subscriptions', AdminSubscriptionController::class);
 
@@ -39,3 +41,7 @@ Route::get('/reaction', [ReactionController::class, 'getReactions']);
 
 Route::post('/users/{id}/approve', [ApprovalController::class, 'approve']);
 Route::post('/users/{id}/reject', [ApprovalController::class, 'reject']);
+
+Route::apiResource('users', UserController::class);
+Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
+Route::post('users/{user}/remove-role', [UserController::class, 'removeRole']);
