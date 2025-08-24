@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\ResetPasswordNotification;
@@ -12,8 +11,7 @@ use App\Notifications\CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -28,7 +26,11 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'profile_picture',
         'national_id_image',
         'is_admin',
+        'subscription_id',
+        'is_approved',
+
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +47,18 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     public function subscription() {
         return $this->belongsTo(Subscription::class);
     }
+    // Helper to get profile image
+public function profileImage()
+{
+    return $this->attachments()->where('category', 'profile_image');
+}
+
+// Helper to get national ID attachment
+public function nationalId()
+{
+    return $this->attachments()->where('category', 'national_id');
+}
+
 
     /**
      * Get the attributes that should be cast.

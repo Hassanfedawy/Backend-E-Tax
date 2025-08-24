@@ -13,6 +13,9 @@ use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StatsController;
+use App\Http\Controllers\ProfileController;
 
 // Public routes (no authentication needed)
 Route::post('/register', [AuthController::class, 'register']);  // an identifier when a post requests happens go to the register method in authcontroller to implement it
@@ -94,3 +97,21 @@ Route::post('/users/{id}/reject', [ApprovalController::class, 'reject']);
 Route::apiResource('users', UserController::class);
 Route::post('users/{user}/assign-role', [UserController::class, 'assignRole']);
 Route::post('users/{user}/remove-role', [UserController::class, 'removeRole']);
+
+
+
+Route::get('/revenue/subscriptions', [SettingsController::class, 'getRevenueBySubscription']);
+
+
+Route::get('/stats/users-this-month', [StatsController::class, 'getUsersThisMonth']);
+Route::get('/stats/posts-today', [StatsController::class, 'getPostsToday']);
+Route::post('/change-password', [AuthController::class, 'changePassword']);
+
+
+Route::post('/settings', [SettingsController::class, 'store']);
+Route::put('/settings/{key}', [SettingsController::class, 'update']);
+Route::get('/profile/{id}', [ProfileController::class, 'show']);
+Route::put('/profile/{id}', [ProfileController::class, 'update']);
+Route::get('/settings', [SettingsController::class, 'index']);   
+Route::delete('/settings/{id}', [SettingsController::class, 'destroy']); 
+
