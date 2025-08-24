@@ -5,7 +5,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\SubscriptionController;
-
+use App\Http\Controllers\Api\ApprovalController;
+use Illuminate\Support\Facades\Route;
 
 Route::apiResource('subscriptions', AdminSubscriptionController::class);
 
@@ -35,3 +36,6 @@ Route::post('/reaction', [ReactionController::class, 'react']);
 Route::delete('/reaction', [ReactionController::class, 'remove']);
 Route::get('/reaction', [ReactionController::class, 'getReactions']);
     
+
+Route::post('/users/{id}/approve', [ApprovalController::class, 'approve']);
+Route::post('/users/{id}/reject', [ApprovalController::class, 'reject']);
