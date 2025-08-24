@@ -2,11 +2,18 @@
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReactionController;
+use App\Http\Controllers\SubscriptionController;
 
 
-Route::get('/checkout/{subscriptionId}', [PaymentController::class, 'checkout'])->name('checkout');
 
-Route::post('/paymob/callback', [PaymentController::class, 'callback']);
+// Get all subscription plans
+Route::get('/subscriptions', [SubscriptionController::class, 'active']);
+
+// Initialize Paymob payment for a subscription
+Route::post('/subscriptions/pay', [PaymentController::class, 'checkout']);
+
+// Optional: Webhook / Callback from Paymob
+Route::post('/payment/callback', [PaymentController::class, 'paymentCallback']);
 
 Route::prefix('posts')->group(function () {
     // Get all comments for a post

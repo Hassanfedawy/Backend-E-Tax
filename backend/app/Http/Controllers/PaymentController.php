@@ -3,88 +3,126 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\PaymobService;
-use Illuminate\Support\Facades\Log;
+use App\Models\Subscription;
+use App\Models\Transaction;
+use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
-    protected $paymob;
+    public function checkout(Request $request)
+{
 
-    public function __construct(PaymobService $paymob)
-    {
-        $this->paymob = $paymob;
+        // ✅ Dummy user data for testing
+    $userId     = 1; // Hardcoded dummy user ID
+    $userEmail  = 'testuser@example.com';
+    $userName   = 'Test User';
+    $userPhone  = '01000000000';
+    
+    // ✅ Validate subscription
+    $request->validate([
+        'subscription_id' => 'required|exists:subscriptions,id'
+    ]);
+
+    $subscription = Subscription::find($request->subscription_id);
+
+
+
+    // ✅ Step 1: Get Paymob Auth Token (disable SSL for testing)
+    $authResponse = Http::withOptions(['verify' => false])->post('https://accept.paymob.com/api/auth/tokens', [
+        'api_key' => env('PAYMOB_API_KEY'),
+    ]);
+
+    if (!$authResponse->successful()) {
+        \Log::error('Paymob Auth Token Request Failed', ['response' => $authResponse->json()]);
+        return response()->json(['error' => 'Failed to authenticate with Paymob'], 500);
     }
 
-    // Checkout for non-auth users with hardcoded values
-    public function checkout()
+    $authToken = $authResponse['token'];
+
+    // ✅ Step 2: Create Order on Paymob
+    $orderResponse = Http::withOptions(['verify' => false])->post('https://accept.paymob.com/api/ecommerce/orders', [
+        'auth_token' => $authToken,
+        'delivery_needed' => false,
+        'amount_cents' => $subscription->cost * 100,
+        'currency' => 'EGP',
+        'items' => [],
+    ]);
+
+    if (!$orderResponse->successful()) {
+        \Log::error('Paymob Order Creation Failed', ['response' => $orderResponse->json()]);
+        return response()->json(['error' => 'Failed to create order on Paymob'], 500);
+    }
+
+    $orderId = $orderResponse['id'];
+
+    // ✅ Step 3: Generate Payment Key
+    $paymentKeyResponse = Http::withOptions(['verify' => false])->post('https://accept.paymob.com/api/acceptance/payment_keys', [
+        'auth_token' => $authToken,
+        'amount_cents' => $subscription->cost * 100,
+        'currency' => 'EGP',
+        'order_id' => $orderId,
+        'billing_data' => [
+            "apartment" => "NA",
+            "email" => $userEmail,
+            "floor" => "NA",
+            "first_name" => $userName,
+            "street" => "NA",
+            "building" => "NA",
+            "phone_number" => $userPhone,
+            "shipping_method" => "NA",
+            "postal_code" => "NA",
+            "city" => "Cairo",
+            "country" => "EG",
+            "last_name" => $userName,
+            "state" => "NA"
+        ],
+        'integration_id' => env('PAYMOB_INTEGRATION_ID'),
+    ]);
+
+    if (!$paymentKeyResponse->successful()) {
+        \Log::error('Paymob Payment Key Request Failed', ['response' => $paymentKeyResponse->json()]);
+        return response()->json(['error' => 'Failed to generate payment key'], 500);
+    }
+
+    $paymentToken = $paymentKeyResponse['token'];
+
+    // ✅ Step 4: Save Transaction with dummy user_id
+    Transaction::create([
+        'user_id' => $userId, // Dummy ID for testing
+        'subscription_id' => $subscription->id,
+        'paymob_order_id' => $orderId,
+        'amount' => $subscription->cost,
+        'status' => 'pending'
+    ]);
+
+return response()->json([
+    'payment_url' => "https://accept.paymob.com/api/acceptance/iframes/" . env('PAYMOB_IFRAME_ID') . "?payment_token=" . $paymentToken
+]);
+
+}
+
+
+    public function paymentCallback(Request $request)
     {
-        try {
-            $amount = 100; // Hardcoded amount in EGP
+        $orderId = $request->input('order');
+        $success = $request->input('success') == "true";
 
-            $billingData = [
-                "first_name" => "Guest",
-                "last_name" => "User",
-                "email" => "guest@example.com",
-                "phone_number" => "+201000000000",
-                "city" => "Cairo",
-                "country" => "EG"
-            ];
+        $transaction = Transaction::where('paymob_order_id', $orderId)->first();
 
-            // Step 1: Get Auth Token
-            $authToken = $this->paymob->getAuthToken();
-            if (!$authToken) {
-                Log::error('Paymob auth token missing');
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Payment checkout error',
-                    'error' => 'Auth token not returned'
-                ]);
+        if ($transaction) {
+            if ($success) {
+                $transaction->status = 'paid';
+                $transaction->save();
+
+                $user = $transaction->user;
+                $user->available_posts += $transaction->subscription->no_of_posts;
+                $user->save();
+            } else {
+                $transaction->status = 'failed';
+                $transaction->save();
             }
-
-            // Step 2: Create Order
-            $orderResponse = $this->paymob->createOrder($authToken, $amount, $billingData);
-            $orderId = $orderResponse['id'] ?? 1;
-
-            if (!$orderId) {
-                Log::error('Paymob order creation failed', ['response' => $orderResponse]);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Payment checkout error',
-                    'error' => 'Order ID missing'
-                ]);
-            }
-
-            // Step 3: Get Payment Key
-            $paymentKey = $this->paymob->getPaymentKey($authToken, $orderId, $billingData, $amount);
-            if (!$paymentKey) {
-                Log::error('Paymob payment key missing', ['orderId' => $orderId]);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Payment checkout error',
-                    'error' => 'Payment token not returned'
-                ]);
-            }
-
-            // Step 4: Return Payment URL
-            $orderUrl = $orderResponse['order_url'] ?? null;
-
-            return response()->json([
-                'status' => 'success',
-                'payment_url' => $orderUrl,
-                'payment_token' => $paymentKey
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Payment checkout error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Payment checkout error',
-                'error' => $e->getMessage()
-            ]);
         }
+
+        return response()->json(['message' => 'Callback processed']);
     }
 }

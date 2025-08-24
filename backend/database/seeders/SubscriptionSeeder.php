@@ -12,16 +12,31 @@ class SubscriptionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 10 test subscriptions
-        for ($i = 1; $i <= 10; $i++) {
-            Subscription::updateOrCreate(
-                ['id' => $i], // Ensure IDs 1-10
-                [
-                    'name' => "Test Subscription {$i}",
-                    'cost' => 100 * $i, // example cost
-                    'description' => "This is a test subscription number {$i}."
-                ]
-            );
+        // Example subscriptions
+        $subscriptions = [
+            [
+                'name' => 'Basic Plan',
+                'no_of_posts' => 10,
+                'cost' => 9.99,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Standard Plan',
+                'no_of_posts' => 30,
+                'cost' => 19.99,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Premium Plan',
+                'no_of_posts' => 100,
+                'cost' => 49.99,
+                'is_active' => false,
+            ],
+        ];
+
+        // Insert into database
+        foreach ($subscriptions as $sub) {
+            Subscription::create($sub);
         }
     }
 }
