@@ -52,6 +52,8 @@ class AuthController extends Controller
             'attachable_type' => 'User'  ,
             'category' => 'national_id'  ,
         ]);
+         // ✅ Add this line to include full URL in response
+        $user->national_id_url = asset('storage/' . $nationalIdPath);
     }
         // send email verification link
         $user->sendEmailVerificationNotification();
@@ -84,7 +86,7 @@ class AuthController extends Controller
     $user = auth('api')->user();
 
     // Check if email is verified
-    if (is_null($user->email_verified_at)) {
+    if (is_null($user->email_verified_at) && !$user->is_admin) {
         // logout immediately so token is not usable
         return response()->json([
             'error' => 'Email not verified. Please check your inbox for the verification link.'
