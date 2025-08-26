@@ -105,7 +105,7 @@ Route::get('/revenue/subscriptions', [SettingsController::class, 'getRevenueBySu
 
 Route::get('/stats/users-this-month', [StatsController::class, 'getUsersThisMonth']);
 Route::get('/stats/posts-today', [StatsController::class, 'getPostsToday']);
-Route::post('/change-password', [AuthController::class, 'changePassword']);
+
 
 
 Route::post('/settings', [SettingsController::class, 'store']);
