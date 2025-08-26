@@ -15,9 +15,9 @@ class PostController extends Controller
   public function store(Request $request)
 {
     $validated = $request->validate([
-        'title'       => 'required|string|max:255',
-        'description' => 'required|string',
-        'attachment'  => 'nullable|file|max:2048'
+    'title'       => 'required|string|max:255',
+    'description' => 'required|string',
+    'attachment'  => 'nullable|file|max:2048|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,ppt,pptx'
     ]);
 
     $post = new Post();
