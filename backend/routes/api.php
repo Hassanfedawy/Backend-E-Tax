@@ -19,13 +19,13 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\ProfileController;
 
 // Auth Routes (زي ما هي)
-// Route::prefix('auth')->group(function () {
-//     Route::post('/register', [AuthController::class, 'register']);
-//     Route::post('/login',    [AuthController::class, 'login']);
-//     Route::post('/logout',   [AuthController::class, 'logout'])->middleware('auth:api');
-//     Route::post('/refresh',  [AuthController::class, 'refresh'])->middleware('auth:api');
-//     Route::get('/me',        [AuthController::class, 'me'])->middleware('auth:api');
-// });
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/logout',   [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post('/refresh',  [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::get('/me',        [AuthController::class, 'me'])->middleware('auth:api');
+});
 
 // Post Routes (بدون middleware عشان تقدر تختبرهم دلوقتي)
 Route::post('/posts',      [PostController::class, 'store']);
@@ -125,7 +125,7 @@ Route::get('/revenue/subscriptions', [SettingsController::class, 'getRevenueBySu
 
 Route::get('/stats/users-this-month', [StatsController::class, 'getUsersThisMonth']);
 Route::get('/stats/posts-today', [StatsController::class, 'getPostsToday']);
-Route::post('/change-password', [AuthController::class, 'changePassword']);
+
 
 
 Route::post('/settings', [SettingsController::class, 'store']);
