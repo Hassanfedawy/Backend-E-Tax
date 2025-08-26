@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 
 
-Route::apiResource('subscriptions', AdminSubscriptionController::class);
+Route::apiResource('adminSubscription', AdminSubscriptionController::class);
 
 // Get all subscription plans
 Route::get('/subscriptions', [SubscriptionController::class, 'active']);

@@ -25,6 +25,7 @@ class ApprovalController extends Controller
 
         $user->is_approved = true;
         $user->available_posts=setting->available_posts;
+
         $user->save();
 
         return response()->json([

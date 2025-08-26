@@ -14,14 +14,17 @@ class SubscriptionController extends Controller
     {
         // dd("1");
         // Show all plans (with active/inactive status)
-        return response()->json(Subscription::all());
+       $subscription= Subscription::all();
+
+        return response()->json(['data' => $subscription]);
+        
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'price'    => 'required|numeric|min:0',
+            'cost'    => 'required|numeric|min:0',
             'no_of_posts' => 'nullable|string',
             'is_active'=> 'boolean'
         ]);
@@ -50,7 +53,7 @@ class SubscriptionController extends Controller
         $validatedData =  $request->validate([
             'name'     => 'sometimes|required|string|max:255',
             'cost'    => 'sometimes|required|numeric|min:0',
-            'no_of_posts' => 'nullable|string',
+            'no_of_posts' => 'nullable|integer',
             'is_active'=> 'boolean'
         ]);
 
