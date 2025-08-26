@@ -125,13 +125,13 @@ Route::get('/revenue/subscriptions', [SettingsController::class, 'getRevenueBySu
 
 Route::get('/stats/users-this-month', [StatsController::class, 'getUsersThisMonth']);
 Route::get('/stats/posts-today', [StatsController::class, 'getPostsToday']);
-Route::post('/change-password', [AuthController::class, 'changePassword']);
+
 
 
 Route::post('/settings', [SettingsController::class, 'store']);
 Route::put('/settings/{key}', [SettingsController::class, 'update']);
-Route::get('/profile/{id}', [ProfileController::class, 'show']);
-Route::put('/profile/{id}', [ProfileController::class, 'update']);
+Route::get('/profile', [ProfileController::class, 'show']);
+Route::put('/profile', [ProfileController::class, 'update']);
 Route::get('/settings', [SettingsController::class, 'index']);   
 Route::delete('/settings/{id}', [SettingsController::class, 'destroy']); 
 

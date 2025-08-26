@@ -63,7 +63,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User registered successfully',
+            'message' => 'User registered successfully, Please verify your email',
             'user' => $user,
             'is_admin' => $user->is_admin,
             'access_token' => $token,
@@ -102,6 +102,7 @@ class AuthController extends Controller
 
         // If successful, return token and user info
         return response()->json([
+            'message'=>'Registered Successfully.',
                 'status' => 'success',
     'user' => [
         'id' => auth('api')->user()->id,

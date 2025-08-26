@@ -23,12 +23,26 @@ class CustomVerifyEmail extends Notification
 
     public function toMail($notifiable)
     {
-        $verificationUrl = $this->verificationUrl($notifiable);
-//template
+
+    $verificationUrl = $this->verificationUrl($notifiable);
+
+    // Extract everything after "verify/"
+    $afterVerify = explode('verify/', $verificationUrl)[1]; 
+    // Example: "36/abc123?expires=...&signature=..."
+
+    $parts = explode('?', $afterVerify);
+    list($id, $hash) = explode('/', $parts[0]);
+    $queryString = $parts[1];
+
+    // Build new frontend URL with id & hash as query params
+    $loginUrl = config('app.frontend_url') . '/user/auth/login?' . $queryString . "&id={$id}&hash={$hash}";
+    
+
+        info($loginUrl);
         return (new MailMessage)
             ->subject('Verify Your Email Address')
              ->view('emails.verify_email', [
-                'url' =>$verificationUrl,
+                'url' =>$loginUrl,
     
             ]);
     }

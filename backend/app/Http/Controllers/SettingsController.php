@@ -25,36 +25,48 @@ class SettingsController extends Controller
     }
 
     /**
-     * Update an existing setting by key.
-     */
-    public function update(Request $request, $key)
-    {
-        
-        $request->validate([
-            'value' => 'required|string',
-            'label' => 'sometimes|string', 
-        ]);
+ * Update an existing setting by ID.
+ */
+public function update(Request $request, $id)
+{   
+    $request->validate([
+        'key'   => 'sometimes|string|unique:settings,key,' . $id,
+        'value' => 'required|string',
+        'label' => 'sometimes|string',
+    ]);
 
-        // Find setting by key
-        $setting = Setting::where('key', $key)->first();
+    // Find setting by ID
+    $setting = Setting::find($id);
 
-        if (!$setting) {
-            return response()->json(['message' => 'Setting not found'], 404);
-        }
-
-        
-        $setting->value = $request->value;
-        if ($request->has('label')) {
-            $setting->label = $request->label;
-        }
-        $setting->save();
-
-        return response()->json([
-            'message' => 'Setting updated successfully',
-            'data'    => $setting
-        ]);
+    if (!$setting) {
+        return response()->json(['message' => 'Setting not found'], 404);
     }
-    
+
+    // Prevent changing the key if it's "free_posts"
+    if ($setting->key === 'free_posts' && $request->has('key') && $request->key !== $setting->key) {
+        return response()->json(['message' => 'You cannot change the key of free_posts record'], 403);
+    }
+
+    // Update fields if allowed
+    if ($request->has('key') && $setting->key !== 'free_posts') {
+        $setting->key = $request->key;
+    }
+
+    $setting->value = $request->value; // always required
+
+    if ($request->has('label')) {
+        $setting->label = $request->label;
+    }
+
+    $setting->save();
+
+    return response()->json([
+        'message' => 'Setting updated successfully',
+        'data'    => $setting
+    ]);
+}
+
+
     
 public function getRevenueBySubscription()
 {
@@ -92,7 +104,7 @@ public function getRevenueBySubscription()
      * Delete a setting by id
      */
     public function destroy($id)
-    {
+    {   
         $setting = Setting::find($id);
 
         if (!$setting) {
