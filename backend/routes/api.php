@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PostController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\VerificationController;
@@ -16,6 +17,25 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\ProfileController;
+
+// Auth Routes (زي ما هي)
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/logout',   [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post('/refresh',  [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::get('/me',        [AuthController::class, 'me'])->middleware('auth:api');
+});
+
+// Post Routes (بدون middleware عشان تقدر تختبرهم دلوقتي)
+Route::post('/posts',      [PostController::class, 'store']);
+Route::get('/posts/mine',  [PostController::class, 'myPosts']);
+Route::get('/posts',       [PostController::class, 'index']);
+Route::get('/posts/{id}',  [PostController::class, 'show']);
+
+
+// APIs are tested by Abdalrahman and Done
+
 
 // Public routes (no authentication needed)
 Route::post('/register', [AuthController::class, 'register']);  // an identifier when a post requests happens go to the register method in authcontroller to implement it
