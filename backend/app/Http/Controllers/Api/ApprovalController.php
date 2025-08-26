@@ -4,15 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-
+use App\Models\Setting;
 class ApprovalController extends Controller
 {
     public function approve($id)
     {
-
         $user = User::find($id);
         $setting=Setting::first();
-
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
@@ -24,7 +22,7 @@ class ApprovalController extends Controller
         }
 
         $user->is_approved = true;
-        $user->available_posts=setting->available_posts;
+        $user->available_posts = $setting->value;
 
         $user->save();
 
