@@ -19,13 +19,13 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\ProfileController;
 
 // Auth Routes (زي ما هي)
-// Route::prefix('auth')->group(function () {
-//     Route::post('/register', [AuthController::class, 'register']);
-//     Route::post('/login',    [AuthController::class, 'login']);
-//     Route::post('/logout',   [AuthController::class, 'logout'])->middleware('auth:api');
-//     Route::post('/refresh',  [AuthController::class, 'refresh'])->middleware('auth:api');
-//     Route::get('/me',        [AuthController::class, 'me'])->middleware('auth:api');
-// });
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
+    Route::post('/logout',   [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post('/refresh',  [AuthController::class, 'refresh'])->middleware('auth:api');
+    Route::get('/me',        [AuthController::class, 'me'])->middleware('auth:api');
+});
 
 // Post Routes (بدون middleware عشان تقدر تختبرهم دلوقتي)
 Route::post('/posts',      [PostController::class, 'store']);
