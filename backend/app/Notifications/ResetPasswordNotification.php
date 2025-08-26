@@ -41,6 +41,14 @@ class ResetPasswordNotification extends Notification
                 'token' => $this->token,
                 'email' => $notifiable->getEmailForPasswordReset(),
             ], false));
+            if ($notifiable->is_admin){
+                $url=config('app.frontend_url'). '/admin/auth/resetpassword?token='.$this->token.'&email='.$notifiable->getEmailForPasswordReset();
+
+            }    
+            else{
+                $url=config('app.frontend_url'). '/user/auth/resetpassword?token='.$this->token.'&email='.$notifiable->getEmailForPasswordReset();
+            }
+           
         return (new MailMessage)
             ->subject('🔑 Reset Your Password')
             ->view('emails.forgot-password', [
