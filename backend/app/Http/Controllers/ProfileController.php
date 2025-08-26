@@ -12,8 +12,9 @@ class ProfileController extends Controller
     /**
      * Get user profile with posts + attachments (with URLs).
      */
-    public function show($id)
+    public function show()
     {
+        $id=auth()->id();
         $user = User::with(['attachments', 'posts.attachments'])->findOrFail($id);
 
         // Map posts to include attachment URLs
@@ -58,8 +59,8 @@ class ProfileController extends Controller
     /**
      * Update user profile (name, email, password, profile image).
      */
-    public function update(Request $request, $id)
-    { 
+    public function update(Request $request)
+    {   $id=auth()->id();
         $user = User::findOrFail($id);
 
         $request->validate([
