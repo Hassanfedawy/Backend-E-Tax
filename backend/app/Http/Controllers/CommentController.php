@@ -11,7 +11,6 @@ class CommentController extends Controller
     // ✅ Ensure the user is authenticated
     public function __construct()
     {
-        $this->middleware('auth:api'); // or 'auth:sanctum' depending on your setup
     }
 
     // Get all comments for a post

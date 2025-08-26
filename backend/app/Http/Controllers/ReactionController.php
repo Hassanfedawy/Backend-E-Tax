@@ -12,44 +12,58 @@ class ReactionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api'); // or auth:sanctum
     }
 
     /**
      * Add or update a reaction
      */
-    public function react(Request $request)
-    {
-        $request->validate([
-            'type' => 'required|in:like,dislike',
-            'reactionable_type' => 'required|in:comment,post',
-            'reactionable_id' => 'required|integer|exists:' . ($request->reactionable_type === 'comment' ? 'comments' : 'posts') . ',id',
-        ]);
+ public function react(Request $request)
+{
+    $request->validate([
+        'type' => 'required|in:like,dislike',
+        'reactionable_type' => 'required|in:comment,post',
+        'reactionable_id' => 'required|integer|exists:' . ($request->reactionable_type === 'comment' ? 'comments' : 'posts') . ',id',
+    ]);
 
-        $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
+    $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
 
-        $reaction = Reaction::where([
+    $reaction = Reaction::where([
+        'user_id' => Auth::id(),
+        'reactionable_type' => $model,
+        'reactionable_id' => $request->reactionable_id,
+    ])->first();
+
+    if ($reaction) {
+        if ($reaction->type === $request->type) {
+            // If same reaction exists, remove it (toggle off)
+            $reaction->delete();
+            return response()->json([
+                'message' => ucfirst($request->type) . ' removed successfully',
+                'status' => 'removed'
+            ]);
+        } else {
+            // If opposite reaction exists, update it
+            $reaction->update(['type' => $request->type]);
+            return response()->json([
+                'message' => 'Reaction updated to ' . $request->type,
+                'status' => 'updated'
+            ]);
+        }
+    } else {
+        // Create a new reaction
+        $reaction = Reaction::create([
             'user_id' => Auth::id(),
             'reactionable_type' => $model,
             'reactionable_id' => $request->reactionable_id,
-        ])->first();
-
-        if ($reaction) {
-            $reaction->update(['type' => $request->type]);
-        } else {
-            $reaction = Reaction::create([
-                'user_id' => Auth::id(),
-                'reactionable_type' => $model,
-                'reactionable_id' => $request->reactionable_id,
-                'type' => $request->type,
-            ]);
-        }
-
+            'type' => $request->type,
+        ]);
         return response()->json([
-            'message' => 'Reaction added/updated successfully',
-            'reaction' => $reaction
+            'message' => ucfirst($request->type) . ' added successfully',
+            'status' => 'added'
         ]);
     }
+}
+
 
     /**
      * Remove a reaction

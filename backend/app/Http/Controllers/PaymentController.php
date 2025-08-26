@@ -52,7 +52,7 @@ class PaymentController extends Controller
         $orderResponse = Http::withOptions(['verify' => false])->post('https://accept.paymob.com/api/ecommerce/orders', [
             'auth_token' => $authToken,
             'delivery_needed' => false,
-            'amount_cents' => $subscription->cost * 100,
+            'amount_cents' => intval($subscription->cost * 100),
             'currency' => 'EGP',
             'items' => [],
         ]);
@@ -67,7 +67,7 @@ class PaymentController extends Controller
         // ✅ Step 3: Generate Payment Key
         $paymentKeyResponse = Http::withOptions(['verify' => false])->post('https://accept.paymob.com/api/acceptance/payment_keys', [
             'auth_token' => $authToken,
-            'amount_cents' => $subscription->cost * 100,
+            'amount_cents' => intval($subscription->cost * 100),
             'currency' => 'EGP',
             'order_id' => $orderId,
             'billing_data' => [
