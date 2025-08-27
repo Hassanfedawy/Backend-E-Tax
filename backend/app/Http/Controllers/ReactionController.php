@@ -3,52 +3,65 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Reaction;
 use App\Models\Comment;
 use App\Models\Post;
 
 class ReactionController extends Controller
 {
+    public function __construct()
+    {
+    }
+
     /**
      * Add or update a reaction
      */
-  public function react(Request $request)
+ public function react(Request $request)
 {
     $request->validate([
-        'user_id' => 'required|exists:users,id',
         'type' => 'required|in:like,dislike',
         'reactionable_type' => 'required|in:comment,post',
-        'reactionable_id' => 'required|integer',
+        'reactionable_id' => 'required|integer|exists:' . ($request->reactionable_type === 'comment' ? 'comments' : 'posts') . ',id',
     ]);
 
-    // Determine the model class
     $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
 
-    // Try to find existing reaction
     $reaction = Reaction::where([
-        'user_id' => $request->user_id,
+        'user_id' => Auth::id(),
         'reactionable_type' => $model,
         'reactionable_id' => $request->reactionable_id,
     ])->first();
 
     if ($reaction) {
-        // Update manually
-        $reaction->type = $request->type;
-        $reaction->save();
+        if ($reaction->type === $request->type) {
+            // If same reaction exists, remove it (toggle off)
+            $reaction->delete();
+            return response()->json([
+                'message' => ucfirst($request->type) . ' removed successfully',
+                'status' => 'removed'
+            ]);
+        } else {
+            // If opposite reaction exists, update it
+            $reaction->update(['type' => $request->type]);
+            return response()->json([
+                'message' => 'Reaction updated to ' . $request->type,
+                'status' => 'updated'
+            ]);
+        }
     } else {
-        // Create manually without mass assignment
-        $reaction = new Reaction();
-        $reaction->user_id = $request->user_id;
-        $reaction->reactionable_type = $model;
-        $reaction->reactionable_id = $request->reactionable_id;
-        $reaction->type = $request->type;
-        $reaction->save();
+        // Create a new reaction
+        $reaction = Reaction::create([
+            'user_id' => Auth::id(),
+            'reactionable_type' => $model,
+            'reactionable_id' => $request->reactionable_id,
+            'type' => $request->type,
+        ]);
+        return response()->json([
+            'message' => ucfirst($request->type) . ' added successfully',
+            'status' => 'added'
+        ]);
     }
-
-    return response()->json([
-        'message' => 'Reaction added/updated successfully',
-        'reaction' => $reaction
-    ]);
 }
 
 
@@ -58,7 +71,6 @@ class ReactionController extends Controller
     public function remove(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'reactionable_type' => 'required|in:comment,post',
             'reactionable_id' => 'required|integer',
         ]);
@@ -66,7 +78,7 @@ class ReactionController extends Controller
         $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
 
         $deleted = Reaction::where([
-            'user_id' => $request->user_id,
+            'user_id' => Auth::id(), // Only delete user's own reaction
             'reactionable_type' => $model,
             'reactionable_id' => $request->reactionable_id,
         ])->delete();
@@ -77,39 +89,34 @@ class ReactionController extends Controller
     }
 
     /**
-     * Get reactions for a specific item
+     * Get total reactions for a specific item
      */
- /**
- * Get total reactions (likes and dislikes) for a specific item
- */
-public function getReactions(Request $request)
-{
-    $request->validate([
-        'reactionable_type' => 'required|in:comment,post',
-        'reactionable_id' => 'required|integer',
-    ]);
+    public function getReactions(Request $request)
+    {
+        $request->validate([
+            'reactionable_type' => 'required|in:comment,post',
+            'reactionable_id' => 'required|integer',
+        ]);
 
-    $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
+        $model = $request->reactionable_type === 'comment' ? Comment::class : Post::class;
 
-    // Count likes
-    $likes = Reaction::where([
-        'reactionable_type' => $model,
-        'reactionable_id' => $request->reactionable_id,
-        'type' => 'like'
-    ])->count();
+        $likes = Reaction::where([
+            'reactionable_type' => $model,
+            'reactionable_id' => $request->reactionable_id,
+            'type' => 'like'
+        ])->count();
 
-    // Count dislikes (optional)
-    $dislikes = Reaction::where([
-        'reactionable_type' => $model,
-        'reactionable_id' => $request->reactionable_id,
-        'type' => 'dislike'
-    ])->count();
+        $dislikes = Reaction::where([
+            'reactionable_type' => $model,
+            'reactionable_id' => $request->reactionable_id,
+            'type' => 'dislike'
+        ])->count();
 
-    return response()->json([
-        'likes' => $likes,
-        'dislikes' => $dislikes,
-        'total' => $likes + $dislikes
-    ]);
+        return response()->json([
+            'likes' => $likes,
+            'dislikes' => $dislikes,
+            'total' => $likes + $dislikes
+        ]);
+    }
 }
-
-}
+ 

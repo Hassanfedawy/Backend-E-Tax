@@ -10,7 +10,7 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
+    {   
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
             $table->string('attachable_type');           
@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('category', ['profile_image','national_id','post']); 
             $table->timestamps(); 
 });
+
 
     }
 
