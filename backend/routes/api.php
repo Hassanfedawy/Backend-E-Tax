@@ -84,6 +84,8 @@ Route::middleware('auth:api')->group(function () {          //will check for a v
 
 Route::apiResource('adminSubscription', AdminSubscriptionController::class);
 
+Route::patch('adminSubscription/{id}/toggle', [AdminSubscriptionController::class, 'toggleStatus']);
+
 // Get all subscription plans
 Route::get('/subscriptions', [SubscriptionController::class, 'active']);
 

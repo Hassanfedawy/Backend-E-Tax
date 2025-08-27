@@ -17,4 +17,8 @@ class Subscription extends Model
         'cost',
         'no_of_posts',
     ];
+    
+     protected $casts = [
+        'is_active' => 'boolean',
+    ];
 }

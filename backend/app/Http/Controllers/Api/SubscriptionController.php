@@ -72,6 +72,22 @@ class SubscriptionController extends Controller
         $subscription->delete();
         return response()->json(['message' => 'Subscription deleted']);
     }
+
+     public function toggleStatus(int $id)
+    {
+        $subscription = Subscription::find($id);
+        if ($subscription === null) {
+            return response()->json(['message' => 'Subscription not found'], 404);
+        }
+
+        $subscription->is_active = !$subscription->is_active;
+        $subscription->save();
+
+        return response()->json([
+            'message' => 'Subscription status updated',
+            'data' => $subscription
+        ]);
+    }
+
+
 }
-
-
