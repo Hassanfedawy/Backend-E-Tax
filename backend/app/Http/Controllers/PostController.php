@@ -15,17 +15,16 @@ class PostController extends Controller
   public function store(Request $request)
 {
     $validated = $request->validate([
-        'title'       => 'required|string|max:255',
-        'description' => 'required|string',
-        'attachment'  => 'nullable|file|max:2048'
+    'title'       => 'required|string|max:255',
+    'description' => 'required|string',
+    'attachment'  => 'nullable|file|max:2048|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,ppt,pptx'
     ]);
 
     $post = new Post();
     $post->title       = $validated['title'];
     $post->description = $validated['description'];
-
     // مؤقتًا، اربط البوست بالـ Admin user اللي اتعمل بالـ Seeder
-    $post->user_id = 1; // بدل auth()->id()
+    $post->user_id = auth()->id();
 
     $post->save();
 
@@ -49,8 +48,8 @@ class PostController extends Controller
   public function myPosts(Request $request)
   {
     $query = Post::with(['user','attachments'])
-      //->where('user_id', auth('api')->id());
-        ->where('user_id', 1); // مؤقتًا Admin user
+      ->where('user_id', auth('api')->id());
+        // ->where('user_id', 1); // مؤقتًا Admin user
 
 
     $this->applySortFilters($query, $request);
