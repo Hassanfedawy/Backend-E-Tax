@@ -27,8 +27,8 @@ class SettingsController extends Controller
     /**
  * Update an existing setting by ID.
  */
-public function update(Request $request)
-{   $id=auth()->id();
+public function update(Request $request, $id)
+{   
     $request->validate([
         'key'   => 'sometimes|string|unique:settings,key,' . $id,
         'value' => 'required|string',
@@ -103,8 +103,8 @@ public function getRevenueBySubscription()
     /**
      * Delete a setting by id
      */
-    public function destroy()
-    {   $id=auth()->id();
+    public function destroy($id)
+    {   
         $setting = Setting::find($id);
 
         if (!$setting) {
