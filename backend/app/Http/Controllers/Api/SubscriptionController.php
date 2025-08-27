@@ -17,7 +17,7 @@ class SubscriptionController extends Controller
        $subscription= Subscription::all();
 
         return response()->json(['data' => $subscription]);
-        
+
     }
 
     public function store(Request $request)
@@ -25,7 +25,7 @@ class SubscriptionController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'cost'    => 'required|numeric|min:0',
-            'no_of_posts' => 'nullable|string',
+            'no_of_posts' => 'required|integer',
             'is_active'=> 'boolean'
         ]);
 
@@ -53,7 +53,7 @@ class SubscriptionController extends Controller
         $validatedData =  $request->validate([
             'name'     => 'sometimes|required|string|max:255',
             'cost'    => 'sometimes|required|numeric|min:0',
-            'no_of_posts' => 'nullable|integer',
+            'no_of_posts' => 'required|integer',
             'is_active'=> 'boolean'
         ]);
 
